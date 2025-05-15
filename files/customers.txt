@@ -1,0 +1,6 @@
+1001,Nimsara,didulantha2004@gmail.com,123456
+1002,Didulantha,it24101804@my.sliit.lk,987654
+1003,Alice,nim@gmail.com,123
+1004,John,John@gmail,john
+200426402741,Dulanjaya,dulanjaya@gmail.com,dula
+200440867820,Isuranda,isuranda@gmail.com,isuranda

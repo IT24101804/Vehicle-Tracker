@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Admin Dashboard</title>
+    <style>
+        body { font-family: Arial; background: #f8f8f8; padding: 20px; }
+        h2 { text-align: center; }
+        .dashboard {
+            max-width: 800px;
+            margin: auto;
+            background: white;
+            padding: 20px;
+            border-radius: 12px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+        }
+        .module {
+            display: flex;
+            justify-content: space-between;
+            margin: 10px 0;
+            padding: 15px;
+            background: #007bff;
+            color: white;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+        .module:hover {
+            background: #0056b3;
+        }
+        .logout-btn {
+            background: red;
+            padding: 10px 20px;
+            border: none;
+            color: white;
+            border-radius: 5px;
+            margin-top: 20px;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+
+<div class="dashboard">
+    <h2>Admin Dashboard</h2>
+
+    <div class="module" onclick="navigate('customer.html')">Customer Management</div>
+    <div class="module" onclick="navigate('all-vehicles.html')">Vehicle Management</div>
+    <div class="module" onclick="navigate('employee.html')">Add New Employee</div>
+    <div class="module" onclick="navigate('all-employees.html')">Employee Management</div>
+    <div class="module" onclick="navigate('admin-appointments.html')">Appointment Management</div>
+    <div class="module" onclick="navigate('admin-service-records.html')">Service Records</div>
+    <div class="module" onclick="navigate('admin-payments.html')">Payment Management</div>
+
+    <button class="logout-btn" onclick="logout()">Logout</button>
+</div>
+
+<script>
+    if (localStorage.getItem("isAdmin") !== "true") {
+        alert("Access denied. Admins only.");
+        window.location.href = "admin-login.html";
+    }
+
+    function navigate(page) {
+        window.location.href = page;
+    }
+
+    function logout() {
+        localStorage.removeItem("isAdmin");
+        window.location.href = "admin-login.html";
+    }
+</script>
+
+</body>
+</html>

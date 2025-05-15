@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Payment Management</title>
+    <style>
+        body { font-family: Arial; margin: 40px; background: #f9f9f9; }
+        .container { background: white; padding: 20px; border-radius: 10px; max-width: 800px; margin: auto; }
+        h2 { text-align: center; }
+        input, button { width: 100%; padding: 10px; margin: 10px 0; }
+        table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+        th, td { border: 1px solid #ccc; padding: 10px; }
+        th { background: #007bff; color: white; }
+        .btn-delete { background: red; color: white; border: none; padding: 5px; }
+    </style>
+</head>
+<body>
+<div class="container">
+    <h2>Payments</h2>
+    <div>
+        <input type="text" id="appointmentId" placeholder="Service ID">
+        <input type="number" id="amount" placeholder="Amount">
+        <select id="status">
+            <option value="Paid">Paid</option>
+            <option value="Pending">Pending</option>
+        </select>
+        <button onclick="makePayment()">Add Payment</button>
+    </div>
+
+    <table>
+        <thead>
+            <tr>
+                <th>ID</th><th>Service ID</th><th>Amount</th><th>Status</th>
+            </tr>
+        </thead>
+        <tbody id="paymentTable"></tbody>
+    </table>
+</div>
+
+<script>
+    const customerId = localStorage.getItem("customerId");
+
+    function loadPayments() {
+        fetch(`/api/payments/by-customer/${customerId}`)
+            .then(res => res.json())
+            .then(data => {
+                const tbody = document.getElementById("paymentTable");
+                tbody.innerHTML = "";
+                data.forEach(p => {
+                    const row = `<tr>
+                        <td>${p.paymentId}</td>
+                        <td>${p.appointmentId}</td>
+                        <td>${p.amount}</td>
+                        <td>${p.status}</td>
+                    </tr>`;
+                    tbody.innerHTML += row;
+                });
+            });
+    }
+
+    function makePayment() {
+        const appointmentId = document.getElementById("appointmentId").value;
+        const amount = document.getElementById("amount").value;
+        const status = document.getElementById("status").value;
+
+        const payment = {
+            paymentId: crypto.randomUUID(),
+            customerId: customerId,
+            appointmentId: appointmentId,
+            amount: parseFloat(amount),
+            status: status
+        };
+
+        fetch("/api/payments/add", {
+            method: "POST",
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payment)
+        }).then(() => {
+            alert("Payment added.");
+            loadPayments();
+        });
+    }
+
+    /*function deletePayment(id) {
+        fetch(`/api/payments/delete/${id}`, { method: "DELETE" })
+            .then(() => {
+                alert("Deleted.");
+                loadPayments();
+            });
+    }*/
+
+    loadPayments();
+</script>
+</body>
+</html>

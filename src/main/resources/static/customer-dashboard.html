@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Customer Dashboard</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 40px;
+            background-color: #f2f2f2;
+        }
+        h2 {
+            color: #333;
+        }
+        .container {
+            background-color: white;
+            padding: 20px;
+            border-radius: 15px;
+            max-width: 600px;
+            margin: auto;
+            box-shadow: 0 0 15px rgba(0,0,0,0.1);
+        }
+        .actions {
+            margin-top: 20px;
+        }
+        button {
+            margin: 8px 0;
+            padding: 10px 15px;
+            font-size: 16px;
+            width: 100%;
+            border: none;
+            border-radius: 10px;
+            background-color: #007bff;
+            color: white;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #0056b3;
+        }
+        .logout {
+            background-color: red;
+        }
+        .logout:hover {
+            background-color: darkred;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h2>Welcome, <span id="customerName"></span>!</h2>
+    <p>Your ID: <span id="customerId"></span></p>
+
+    <div class="actions">
+        <button onclick="location.href='profile.html'">View/Update Profile</button>
+        <button onclick="location.href='vehicle.html'">Manage Vehicles</button>
+        <button onclick="location.href='appointments.html'">View/Make Appointment</button>
+        <button onclick="location.href='service.html'">Service History</button>
+        <button onclick="location.href='payment.html'">Make/View Payment</button>
+        <button class="logout" onclick="logout()">Logout</button>
+    </div>
+</div>
+
+<script>
+    // Check if customer is logged in
+    const name = localStorage.getItem("customerName");
+    const id = localStorage.getItem("customerId");
+
+    if (!name || !id) {
+        alert("Please log in first.");
+        window.location.href = "login.html";
+    } else {
+        document.getElementById("customerName").innerText = name;
+        document.getElementById("customerId").innerText = id;
+    }
+
+    function logout() {
+        localStorage.removeItem("customerName");
+        localStorage.removeItem("customerId");
+        window.location.href = "login.html";
+    }
+
+
+document.addEventListener("DOMContentLoaded", function () {
+    const customerId = localStorage.getItem("customerId");
+    if (!customerId) {
+        alert("Not logged in.");
+        window.location.href = "customer-login.html";
+        return;
+    }
+
+    fetch("http://localhost:8080/api/vehicles/customer/" + customerId)
+        .then(res => {
+            if (!res.ok) throw new Error("Network response was not ok");
+            return res.json();
+        })
+        .then(data => {
+            console.log("Fetched Vehicles:", data);
+            // Use this data to show vehicles
+        })
+        //.catch(err => {
+           // console.error("Error fetching vehicles:", err);
+          //  alert("Error fetching vehicles");
+        //});
+});
+
+
+
+</script>
+
+</body>
+</html>

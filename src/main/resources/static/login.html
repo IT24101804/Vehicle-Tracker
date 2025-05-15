@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Customer Login</title>
+</head>
+<body>
+    <h2>Login</h2>
+    <form id="loginForm">
+        Email: <input type="email" id="email" required><br>
+        Password: <input type="password" id="password" required><br>
+        <button type="submit">Login</button>
+    </form>
+
+    <script>
+        document.getElementById("loginForm").addEventListener("submit", function(e) {
+            e.preventDefault();
+    
+            const email = document.getElementById("email").value;
+            const password = document.getElementById("password").value;
+    
+            const data = { email: email, password: password };
+    
+            // Authenticate the customer
+            fetch("/api/customers/login", {
+                method: "POST",
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(data)
+            })
+            .then(res => res.json())
+            .then(customer => {
+                if (customer && customer.customerId) {
+                    // Store customer info in localStorage
+                    localStorage.setItem("customerId", customer.customerId);
+                    localStorage.setItem("customerName", customer.name);
+                    localStorage.setItem("customerEmail", customer.email);
+                    localStorage.setItem("customerPassword", password); // optional: remove if not needed
+    
+                    // Redirect to the customer dashboard or service history page
+                    window.location.href = "customer-dashboard.html";  // Or another page you want to direct them to
+                } else {
+                    alert("Invalid credentials.");
+                }
+            })
+            .catch(err => {
+                console.error("Login error: ", err);
+                alert("Login failed. Please try again.");
+            });
+        });
+    </script>
+    
+</body>
+</html>

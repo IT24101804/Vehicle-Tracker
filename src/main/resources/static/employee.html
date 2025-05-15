@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Employee Management</title>
+</head>
+<body>
+    <h2>Add New Employee</h2>
+    <form id="employeeForm">
+        ID: <input type="text" id="employeeId" required><br>
+        Name: <input type="text" id="name" required><br>
+        Email: <input type="email" id="email" required><br>
+        Phone: <input type="text" id="phone" required><br>
+        Address: <input type="text" id="address" required><br>
+        NIC Number: <input type="text" id="nicNumber" required><br>
+        Password: <input type="password" id="password" required><br>
+        <button type="submit">Add Employee</button>
+    </form>
+
+    <script>
+        function logout() {
+            localStorage.removeItem("isAdmin");
+            window.location.href = "admin.html";
+        }
+    </script>
+
+    <script>
+        document.getElementById("employeeForm").addEventListener("submit", function(e) {
+            e.preventDefault();
+            const data = {
+                employeeId: document.getElementById("employeeId").value,
+                name: document.getElementById("name").value,
+                email: document.getElementById("email").value,
+                phone: document.getElementById("phone").value,
+                address: document.getElementById("address").value,
+                nicNumber: document.getElementById("nicNumber").value,
+                password: document.getElementById("password").value
+            };
+
+            fetch("/api/employees", {
+                method: "POST",
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(data)
+            }).then(() => alert("Employee added!"))
+              .catch((error) => alert("Error adding employee: " + error));
+        });
+    </script>
+
+    <script>
+        // Redirect if not admin
+        if (localStorage.getItem("isAdmin") !== "true") {
+            alert("Access denied. Admins only.");
+            window.location.href = "admin.html";
+        }
+    </script>
+</body>
+</html>

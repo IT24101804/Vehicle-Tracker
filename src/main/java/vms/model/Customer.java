@@ -1,0 +1,40 @@
+package vms.model;
+
+public class Customer {
+    private String customerId;
+    private String name;
+    private String email;
+    private String password;
+
+    public Customer() {}
+
+    public Customer(String customerId, String name, String email, String password) {
+        this.customerId = customerId;
+        this.name = name;
+        this.email = email;
+        this.password = password;
+    }
+
+    // Getters and Setters
+    public String getCustomerId() { return customerId; }
+    public void setCustomerId(String customerId) { this.customerId = customerId; }
+
+    public String getName() { return name; }
+    public void setName(String name) { this.name = name; }
+
+    public String getEmail() { return email; }
+    public void setEmail(String email) { this.email = email; }
+
+    public String getPassword() { return password; }
+    public void setPassword(String password) { this.password = password; }
+
+    @Override
+    public String toString() {
+        return customerId + "," + name + "," + email + "," + password;
+    }
+
+    public static Customer fromString(String line) {
+        String[] parts = line.split(",", 4);
+        return new Customer(parts[0], parts[1], parts[2], parts[3]);
+    }
+}

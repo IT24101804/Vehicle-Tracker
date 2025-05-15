@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Add Service Record</title>
+    <style>
+        body {
+            font-family: Arial;
+            padding: 20px;
+        }
+        form {
+            max-width: 500px;
+            background: #f9f9f9;
+            padding: 20px;
+            border-radius: 10px;
+        }
+        input, textarea {
+            width: 100%;
+            margin-bottom: 10px;
+            padding: 10px;
+        }
+        button {
+            padding: 10px 20px;
+            background: green;
+            color: white;
+            border: none;
+        }
+    </style>
+</head>
+<body>
+
+<h2>Add Service Record</h2>
+
+<form id="serviceForm">
+    <input type="text" id="vehicleId" placeholder="Vehicle ID" required />
+    <input type="text" id="customerId" placeholder="Customer ID" required /> <!-- Newly placed Customer ID -->
+    <input type="text" id="customerName" placeholder="Customer Name" required />
+    <input type="date" id="date" required />
+    <textarea id="description" placeholder="Description" required></textarea>
+    <input type="text" id="status" placeholder="Status" required />
+    <input type="number" id="cost" placeholder="Cost" required />
+    <button type="submit">Add Record</button>
+</form>
+
+<script>
+    document.getElementById("serviceForm").addEventListener("submit", function (e) {
+        e.preventDefault();
+
+        const record = {
+            vehicleId: document.getElementById("vehicleId").value,
+            customerId: document.getElementById("customerId").value,
+            customerName: document.getElementById("customerName").value,
+            date: document.getElementById("date").value,
+            description: document.getElementById("description").value,
+            status: document.getElementById("status").value,
+            cost: document.getElementById("cost").value
+        };
+
+        fetch("http://localhost:8080/api/service-records", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify(record)
+        })
+        .then(res => {
+            if (res.ok) {
+                alert("Service Record Added Successfully!");
+                document.getElementById("serviceForm").reset();
+            } else {
+                alert("Failed to add service record.");
+            }
+        });
+    });
+</script>
+
+</body>
+</html>

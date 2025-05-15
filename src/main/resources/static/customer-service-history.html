@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Customer Service History</title>
+</head>
+<body>
+    <h2>Your Service History</h2>
+    <table border="1" id="serviceTable">
+        <tr>
+            <th>Service ID</th>
+            <th>Vehicle ID</th>
+            <th>Service Date</th>
+            <th>Description</th>
+            <th>Status</th>
+        </tr>
+    </table>
+
+    <script>
+        // Assuming vehicle IDs are stored in localStorage after login
+        const vehicles = JSON.parse(localStorage.getItem("customerVehicles")); // example: ["VEH001", "VEH002"]
+        if (!vehicles || vehicles.length === 0) {
+            alert("No vehicles found. Please login.");
+            window.location.href = "login.html";
+        }
+
+        // Fetch service history for vehicles
+        fetch("http://localhost:8080/api/services/by-vehicles", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify(vehicles)
+        })
+        .then(res => res.json())
+        .then(data => {
+            const table = document.getElementById("serviceTable");
+            data.forEach(record => {
+                const row = table.insertRow();
+                row.innerHTML = `
+                    <td>${record.serviceId}</td>
+                    <td>${record.vehicleId}</td>
+                    <td>${record.serviceDate}</td>
+                    <td>${record.description}</td>
+                    <td>${record.status}</td>
+                `;
+            });
+        });
+    </script>
+</body>
+</html>

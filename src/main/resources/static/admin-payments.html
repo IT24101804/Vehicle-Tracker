@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Admin - Payment Management</title>
+    <style>
+        body { font-family: Arial; padding: 20px; background: #f4f4f4; }
+        table { width: 100%; border-collapse: collapse; background: #fff; }
+        th, td { padding: 10px; border: 1px solid #ddd; }
+        th { background: #007bff; color: white; }
+        input { width: 100%; padding: 6px; }
+        .btn { background: green; color: white; border: none; padding: 5px 10px; cursor: pointer; border-radius: 4px; }
+        .btn:hover { background: darkgreen; }
+    </style>
+</head>
+<body>
+    <h2>Admin - View & Edit Payments</h2>
+    <table id="paymentsTable">
+        <thead>
+            <tr>
+                <th>Payment ID</th>
+                <th>Customer ID</th>
+                <th>Appointment ID</th>
+                <th>Amount</th>
+                <th>Status</th>
+                <th>Update</th>
+            </tr>
+        </thead>
+        <tbody></tbody>
+    </table>
+
+    <script>
+        function loadPayments() {
+            fetch("/api/payments/all")
+                .then(res => res.json())
+                .then(data => {
+                    const tbody = document.querySelector("#paymentsTable tbody");
+                    tbody.innerHTML = "";
+
+                    data.forEach(p => {
+                        tbody.innerHTML += `
+                            <tr>
+                                <td>${p.paymentId}</td>
+                                <td>${p.customerId}</td>
+                                <td>${p.appointmentId}</td>
+                                <td><input type="text" value="${p.amount}" id="amt-${p.paymentId}"></td>
+                                <td><input type="text" value="${p.status}" id="status-${p.paymentId}"></td>
+                                <td><button class="btn" onclick="updatePayment('${p.paymentId}', '${p.customerId}', '${p.appointmentId}')">Save</button></td>
+                            </tr>`;
+                    });
+                });
+        }
+
+        function updatePayment(paymentId, customerId, appointmentId) {
+            const amount = document.getElementById("amt-" + paymentId).value;
+            const status = document.getElementById("status-" + paymentId).value;
+
+            fetch("/api/payments/update", {
+                method: "PUT",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                    paymentId, customerId, appointmentId, amount, status
+                })
+            }).then(() => {
+                alert("Payment updated successfully.");
+                loadPayments();
+            });
+        }
+
+        loadPayments();
+    </script>
+</body>
+</html>

@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pending Appointments</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f2f2f2;
+            margin: 0;
+            padding: 20px;
+        }
+        .container {
+            background-color: #fff;
+            padding: 30px;
+            border-radius: 10px;
+            max-width: 1000px;
+            margin: auto;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+        h2 {
+            color: #007bff;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+        th, td {
+            padding: 10px;
+            border: 1px solid #ddd;
+            text-align: left;
+        }
+        button {
+            padding: 8px 12px;
+            background-color: #28a745;
+            color: white;
+            border: none;
+            cursor: pointer;
+            border-radius: 5px;
+        }
+        button.complete {
+            background-color: orange;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h2>Pending Appointments</h2>
+    <table id="appointmentsTable">
+        <thead>
+            <tr>
+                <th>Appointment ID</th>
+                <th>Customer ID</th>
+                <th>Vehicle ID</th>
+                <th>Date</th>
+                <th>Action</th>
+            </tr>
+        </thead>
+        <tbody>
+            <!-- Pending Appointments will be populated here -->
+        </tbody>
+    </table>
+</div>
+
+<script>
+// Fetch and load pending appointments
+function loadAppointments() {
+    fetch("/api/appointments/pending")
+        .then(res => res.json())
+        .then(data => {
+            const tbody = document.getElementById("appointmentsTable").querySelector("tbody");
+            tbody.innerHTML = "";
+            data.forEach(app => {
+                const row = document.createElement("tr");
+                const dateTime = app.appointmentDate; // Ensure this is in the format: yyyy-MM-dd HH:mm
+                const date = dateTime.split("  ")[0];
+                const time = dateTime.split("  ")[1];
+                
+                row.innerHTML = `
+                    <td>${app.appointmentId}</td>
+                    <td>${app.customerId}</td>
+                    <td>${app.vehicleId}</td>
+                    <td>${date}</td>
+                    <td><button class="complete" onclick="completeAppointment('${app.appointmentId}')">Mark Complete</button></td>
+                `;
+                tbody.appendChild(row);
+            });
+        });
+}
+
+// Mark an appointment as completed
+function completeAppointment(id) {
+    fetch(`/api/appointments/${id}/complete`, {
+        method: "POST",
+    }).then(() => {
+        alert("Appointment completed.");
+        loadAppointments(); // Refresh the pending appointments list
+    });
+}
+
+// Initial load of appointments
+window.onload = function() {
+    loadAppointments();
+};
+</script>
+
+
+</body>
+</html>

@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Customer Appointment Management</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 40px;
+            background-color: #f4f4f4;
+        }
+
+        h2, h3 {
+            text-align: center;
+            color: #333;
+        }
+
+        .form-container, .table-container {
+            background-color: white;
+            padding: 20px;
+            margin: 30px auto;
+            border-radius: 10px;
+            max-width: 700px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+        }
+
+        input, select {
+            width: 100%;
+            padding: 10px;
+            margin: 12px 0;
+            box-sizing: border-box;
+            border-radius: 5px;
+            border: 1px solid #ccc;
+        }
+
+        button {
+            padding: 10px 20px;
+            border: none;
+            background-color: #28a745;
+            color: white;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background-color: #218838;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 15px;
+        }
+
+        th, td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid #ccc;
+        }
+
+        .cancel-btn {
+            background-color: red;
+            color: white;
+            border: none;
+            padding: 5px 10px;
+            border-radius: 5px;
+            margin-right: 5px;
+        }
+    </style>
+</head>
+<body>
+
+<h2>My Appointments</h2>
+
+<div class="form-container">
+    <h3 id="formTitle">Make a New Appointment</h3>
+    <form id="appointmentForm">
+        <input type="hidden" id="appointmentId" />
+
+        <label>Vehicle:</label>
+        <select id="vehicleId" required>
+            <option value="">-- Select Vehicle --</option>
+        </select>
+
+        <label>Appointment Date:</label>
+        <input type="datetime-local" id="appointmentDate" required>
+
+        <button type="submit">Submit Appointment</button>
+    </form>
+</div>
+
+<div class="table-container">
+    <h3>My Appointments</h3>
+    <table id="appointmentTable">
+        <thead>
+            <tr>
+                <th>Appointment ID</th>
+                <th>Vehicle</th>
+                <th>Date</th>
+                <th>Status</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody></tbody>
+    </table>
+</div>
+
+<script>
+    const customerId = localStorage.getItem("customerId");
+
+    if (!customerId) {
+        alert("You must be logged in to view this page.");
+        window.location.href = "login.html";
+    }
+
+    document.getElementById("appointmentForm").addEventListener("submit", function(e) {
+        e.preventDefault();
+
+        const appointmentId = document.getElementById("appointmentId").value || generateUUID();
+        const vehicleId = document.getElementById("vehicleId").value;
+        const appointmentDate = document.getElementById("appointmentDate").value;
+
+        const isEdit = document.getElementById("appointmentId").value !== "";
+        const url = isEdit ? "/api/appointments/update" : "/api/appointments/add";
+        const method = isEdit ? "PUT" : "POST";
+
+        fetch(url, {
+            method: method,
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                appointmentId,
+                customerId,
+                vehicleId,
+                appointmentDate,
+                status: "Scheduled"
+            })
+        })
+        .then(response => response.text())
+        .then(() => {
+            alert(isEdit ? "Appointment updated!" : "Appointment created!");
+            document.getElementById("appointmentForm").reset();
+            document.getElementById("appointmentId").value = "";
+            document.getElementById("formTitle").innerText = "Make a New Appointment";
+            loadAppointments();
+        })
+        .catch(err => {
+            console.error(err);
+            alert("Failed to save appointment.");
+        });
+    });
+
+    function loadAppointments() {
+        fetch(`/api/appointments/by-customer/${customerId}`)
+            .then(res => res.json())
+            .then(data => {
+                const tbody = document.querySelector("#appointmentTable tbody");
+                tbody.innerHTML = "";
+
+                if (!data || data.length === 0) {
+                    tbody.innerHTML = `<tr><td colspan="5">No appointments found.</td></tr>`;
+                    return;
+                }
+
+                data.forEach(app => {
+                    const row = `<tr>
+                        <td>${app.appointmentId}</td>
+                        <td>${app.vehicleId}</td>
+                        <td>${new Date(app.appointmentDate).toLocaleString()}</td>
+                        <td>${app.status}</td>
+                        <td>
+                            <button class="cancel-btn" onclick="cancelAppointment('${app.appointmentId}')">Cancel</button>
+                            <button onclick="editAppointment('${app.appointmentId}', '${app.vehicleId}', '${app.appointmentDate}')">Edit</button>
+                        </td>
+                    </tr>`;
+                    tbody.innerHTML += row;
+                });
+            })
+            .catch(err => {
+                console.error(err);
+                alert("Failed to load appointments.");
+            });
+    }
+
+    function cancelAppointment(id) {
+        if (confirm("Are you sure you want to cancel this appointment?")) {
+            fetch(`/api/appointments/delete/${id}`, { method: "DELETE" })
+                .then(() => {
+                    alert("Appointment cancelled.");
+                    loadAppointments();
+                })
+                .catch(err => {
+                    console.error(err);
+                    alert("Failed to cancel appointment.");
+                });
+        }
+    }
+
+    function editAppointment(id, vehicleId, date) {
+        document.getElementById("formTitle").innerText = "Edit Appointment";
+        document.getElementById("appointmentId").value = id;
+        document.getElementById("vehicleId").value = vehicleId;
+        document.getElementById("appointmentDate").value = new Date(date).toISOString().slice(0, 16);
+    }
+
+    function generateUUID() {
+        return 'xxxx-4xxx-yxxx'.replace(/[xy]/g, function(c) {
+            const r = Math.random() * 16 | 0, v = c === 'x' ? r : (r & 0x3 | 0x8);
+            return v.toString(16);
+        });
+    }
+
+    function loadCustomerVehicles() {
+        fetch(`/api/vehicles/by-customer/${customerId}`)
+            .then(res => res.json())
+            .then(vehicles => {
+                const dropdown = document.getElementById("vehicleId");
+                dropdown.innerHTML = `<option value="">-- Select Vehicle --</option>`;
+                vehicles.forEach(v => {
+                    const option = document.createElement("option");
+                    option.value = v.vehicleId;
+                    option.text = `${v.vehicleId} - ${v.make} ${v.model}`;
+                    dropdown.appendChild(option);
+                });
+            })
+            .catch(err => {
+                console.error(err);
+                alert("Failed to load vehicles.");
+            });
+    }
+
+    // Initial Load
+    loadCustomerVehicles();
+    loadAppointments();
+</script>
+
+</body>
+</html>

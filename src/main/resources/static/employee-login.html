@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Employee Login</title>
+</head>
+<body>
+    <h2>Employee Login</h2>
+    <form id="loginForm">
+        Email: <input type="email" id="email" required><br>
+        Password: <input type="password" id="password" required><br>
+        <button type="submit">Login</button>
+    </form>
+
+    <script>
+        document.getElementById("loginForm").addEventListener("submit", function(e) {
+            e.preventDefault();
+
+            const email = document.getElementById("email").value;
+            const password = document.getElementById("password").value;
+
+            const data = { email: email, password: password };
+
+            fetch("/api/employees/login", {
+                method: "POST",
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(data)
+            })
+            .then(res => res.json())
+            .then(employee => {
+                if (employee && employee.employeeId) {
+                    // Save login session info
+                    localStorage.setItem("employeeId", employee.employeeId);
+                    localStorage.setItem("employeeName", employee.name);
+                    localStorage.setItem("employeeEmail", employee.email);
+
+                    alert("Login successful!");
+                    window.location.href = "employee-dashboard.html";
+                } else {
+                    alert("Invalid credentials.");
+                }
+            })
+            .catch(err => {
+                console.error("Login error: ", err);
+                alert("Login failed. Please try again.");
+            });
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Service History</title>
+    <style>
+        body { font-family: Arial, sans-serif; padding: 20px; background: #f2f2f2; }
+        h2 { color: #333; }
+        table {
+            width: 100%; border-collapse: collapse; margin-top: 20px;
+            background-color: white;
+        }
+        th, td {
+            border: 1px solid #ddd; padding: 12px; text-align: left;
+        }
+        th {
+            background-color: #007bff; color: white;
+        }
+        tr:nth-child(even) { background-color: #f9f9f9; }
+    </style>
+</head>
+<body>
+
+<h2>Your Service History</h2>
+
+<table id="historyTable">
+    <thead>
+        <tr>
+            <th>Service ID</th>
+            <th>Vehicle ID</th>
+            <th>Customer ID</th> <!-- New column -->
+            <th>Date</th>
+            <th>Description</th>
+            <th>Status</th>
+            <th>Cost</th>
+        </tr>
+    </thead>
+    <tbody></tbody>
+</table>
+
+<script>
+    const customerId = localStorage.getItem("customerId");
+    if (!customerId) {
+        alert("Please login first");
+        window.location.href = "login.html";
+    }
+
+    async function loadServiceHistory() {
+        try {
+            const res = await fetch('/api/service-records/customer/' + customerId);
+            const records = await res.json();
+
+            const rows = records.map(record => `
+                <tr>
+                    <td>${record.serviceId}</td>
+                    <td>${record.vehicleId}</td>
+                    <td>${record.customerId}</td> <!-- Customer ID shown here -->
+                    <td>${record.date}</td>
+                    <td>${record.description}</td>
+                    <td>${record.status}</td>
+                    <td>${record.cost}</td>
+                </tr>
+            `);
+
+            document.querySelector("#historyTable tbody").innerHTML = rows.join('');
+        } catch (err) {
+            console.error("Error loading service history", err);
+            alert("Failed to load service records.");
+        }
+    }
+
+    loadServiceHistory();
+</script> 
+
+
+</body>
+</html>

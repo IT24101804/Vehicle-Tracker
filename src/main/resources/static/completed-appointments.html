@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Completed Appointments</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f2f2f2;
+            margin: 0;
+            padding: 20px;
+        }
+        .container {
+            background-color: #fff;
+            padding: 30px;
+            border-radius: 10px;
+            max-width: 1000px;
+            margin: auto;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+        h2 {
+            color: #007bff;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+        th, td {
+            padding: 10px;
+            border: 1px solid #ddd;
+            text-align: left;
+        }
+        button {
+            padding: 8px 12px;
+            background-color: red;
+            color: white;
+            border: none;
+            cursor: pointer;
+            border-radius: 5px;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h2>Completed Appointments</h2>
+    <table id="completedAppointmentsTable">
+        <thead>
+            <tr>
+                <th>Appointment ID</th>
+                <th>Customer ID</th>
+                <th>Vehicle ID</th>
+                <th>Date</th>
+                <th>Time</th>
+            </tr>
+        </thead>
+        <tbody>
+            <!-- Completed Appointments will be populated here -->
+        </tbody>
+    </table>
+</div>
+
+<script>
+// Fetch and load completed appointments
+function loadCompletedAppointments() {
+    fetch("/api/appointments/completed")
+        .then(res => res.json())
+        .then(data => {
+            const tbody = document.getElementById("completedAppointmentsTable").querySelector("tbody");
+            tbody.innerHTML = "";
+            data.forEach(app => {
+                const appointmentDate = app.appointmentDate; // The date-time string from backend
+                const [date, time] = appointmentDate.split("T"); // Split date and time
+
+                // Format time to remove milliseconds
+                const formattedTime = formatTime(time);
+
+                const row = document.createElement("tr");
+                row.innerHTML = `
+                    <td>${app.appointmentId}</td>
+                    <td>${app.customerId}</td>
+                    <td>${app.vehicleId}</td>
+                    <td>${date}</td>
+                    <td>${formattedTime}</td>
+                    
+                `;
+                tbody.appendChild(row);
+            });
+        });
+}
+
+// Helper function to format the time without milliseconds
+function formatTime(time) {
+    // Check if time exists, split by '.' to remove milliseconds
+    if (time) {
+        const [hoursMinutesSeconds] = time.split("."); // Keep only hours:minutes:seconds
+        return hoursMinutesSeconds;
+    }
+    return time; // Return the time if no milliseconds are found
+}
+
+// Delete a completed appointment
+function deleteAppointment(id) {
+    fetch(`/api/appointments/${id}`, {
+        method: "DELETE"
+    }).then(() => {
+        alert("Appointment deleted.");
+        loadCompletedAppointments(); // Refresh the completed appointments list
+    });
+}
+
+// Initial load of completed appointments
+window.onload = function() {
+    loadCompletedAppointments();
+};
+
+</script>
+
+</body>
+</html>
